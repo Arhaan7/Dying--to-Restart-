@@ -1,9 +1,6 @@
 #Arhaan Wazid Board Game, Dying To Restart
 
 
-# last task was fixing up the pygame text on the board game screen
-
-
 import pygame
 import random
 
