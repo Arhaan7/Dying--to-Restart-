@@ -1,34 +1,35 @@
-#Arhaan Wazid Board Game, Dying To Restart
+# Arhaan Wazid Board Game, Dying To Restart
 
-
+# importing the libraries needed
 import pygame
 import random
 
 
 # main function
 def main():
-
+    # initializing pygame window
     pygame.font.init()
 
+    # type of font used in the pygame window
     font = pygame.font.SysFont('times new roman', 16)
-
 
     # size of the board meaning 8 squares in width and 7 in height, 8x7=56
     width = 8
     height = 7
+    # Outputting certain rules to the user watching the game
     print("Note: When a player rolls a three it permits a double move, so the player will move 6 places.")
     print("A player cannot move past end of the board, if it rolls over the board, it will go back to the start.")
     print("When you roll a 4, the game will skip the player's turn.")
 
+    # making a counter so that each player only has 30 turns, game could go on forever as it stops when there is a winner
     counter = 0
-
 
     # size of the squares so 50x50 pixels
     square_dim = 50
     # setting up pygame window
-    win = pygame.display.set_mode((width * square_dim, height * (square_dim+10)))
+    win = pygame.display.set_mode((width * square_dim, height * (square_dim + 10)))
     # making a board with the same pygame dimensions
-    board = pygame.Surface((width * square_dim, height * (square_dim+10)))
+    board = pygame.Surface((width * square_dim, height * (square_dim + 10)))
     # filling board with a white background
     board.fill((255, 255, 255))
     # setting up colours for the checkerboard
@@ -65,152 +66,137 @@ def main():
     player1(win, pos_x1, pos_y1)
     # player 2 is blue
     player2(win, pos_x2, pos_y2)
+    # updating the screen and delaying it for the user to see the characters move
     pygame.display.update()
-    # making a while loop for the computers to play against each other until one of them wins
+    pygame.time.delay(300)
 
     while True:
+        # adds 1 every time a turn takes place
+        counter += 1
 
-
-        # player 1 turn
-        print("Player 1 turn (Red)")
-        # Player 1 turn
-        display_text_on_board(board, font, "Player 1 turn (Red)", (20, 350))
-        pygame.display.update()
-        # Rolling the dice
-        die_1 = roll()
-        die_2 = roll()
-        space = die_1 + die_2
-        display_text_on_board(board, font, f"Player 1 rolls {space}", (20, 400))
-        pygame.display.update()
-
-        # if player 1 rolls a three they get a double move, so they actually move 6 places
-        # this qualifies as features from table "Double Moves"
-        if space == 3:
-            space += space
-            print("Congrats Player 1, you get a double move for rolling a 3")
-            print("Now you can move ", space, "places")
-        # if the player rolls a sum of 4, the game automatically skips their turn
-        # this qualifies as "Missed Turns" from the table 1 features
-        if space == 4:
-            space = 0
-            print("OH NO. You rolled a 4. This means we skip your turn")
-            print("You move", space, "spaces")
-
-        # loop for many spaces player 1 moves
-        for i in range(space):
-            # drawing the board after every loop and displaying player 1 and player 2 and player 1's new position
-            win.blit(board, (0, 0))
-            player1(win, pos_x1, pos_y1)
-            player2(win, pos_x2, pos_y2)
-            # if player is in the end of the board then they move down a row and start from the left of the row
-            # they then move from left to right again until one of them wins the game
-            if pos_x1 > 310 and pos_y1 < 310:
-                pos_y1 += 50
-                pos_x1 = 10
-            # if player is not at the end of the board they just go again from left to right, each move is worth
-            # 50 pixels to the right
-            else:
-                pos_x1 += 50
-            # if they go past the board in the bottom right corner then they have to restart from the beginning
-            # this qualifies as features from table 1 "Exact Requirements"
-            if pos_x1 > 360:
-                print("Player 1: Rolled over the end of the board. Go back to the start!")
-                pos_x1 = 10
-                pos_y1 = 10
-                break
-            # delaying and updating screen after each loop
-            pygame.display.update()
-            pygame.time.delay(300)
-
-        # displays the player in the last box, if they reached there or else it will just end the game
+        # Player 1's turn
+        pos_x1, pos_y1 = handle_player_turn(win, board, font, "Red", pos_x1, pos_y1, player1, pos_x2, pos_y2)
         win.blit(board, (0, 0))
+        # displaying the players on the board
         player1(win, pos_x1, pos_y1)
         player2(win, pos_x2, pos_y2)
+        # updating the board
         pygame.display.update()
         pygame.time.delay(300)
-        # checks to see if player 1 is at the exact coordinates of the last box and if they are then they won the game
+
+        # if player 1 is landed on these coordinates then player 1 wins the game
         if pos_y1 == 310 and pos_x1 == 360:
             print("Player 1 wins")
-            # breaking the loop and ending the game
             break
 
-            #Player 1 turn
-        display_text_on_board(board, font, "Player 2 turn (Blue)", (20, 350))
-        pygame.display.update()
-        # Rolling the dice
-        die_1 = roll()
-        die_2 = roll()
-        spaces_2 = die_1 + die_2
-
-        display_text_on_board(board, font, f"Player 2 rolls {spaces_2}", (20, 400))
-        pygame.display.update()
-        # if player 2 rolls a three they get a double move, so they are actually moving 6 places instead of 3
-        # this qualifies as features from table "Double Moves"
-        if spaces_2 == 3:
-            space += space
-            print("Congrats Player 2, you get a double move for rolling a 3")
-            print("Now you can move ", space, "places")
-
-        # if the player rolls a sum of 4, the game automatically skips their turn
-        # this qualifies as "Missed Turns" from the table 1 features
-        if spaces_2 == 4:
-            print("OH NO. You rolled a 4. This means we skip your turn")
-            spaces_2 = 0
-            print("You move", spaces_2, "spaces")
-        # starting for loop for player 2 and how many times they move in the board
-        for j in range(spaces_2):
-            # drawing the board after every loop and displaying player 1 and player 2
-            win.blit(board, (0, 0))
-            player1(win, pos_x1, pos_y1)
-            player2(win, pos_x2, pos_y2)
-            # if player is in the end of the board then they move down a row and start from the left of the row
-            # they then move from left to right again until one of them wins the game
-            if pos_x2 > 310 and pos_y2 < 330:
-                pos_y2 += 50
-                pos_x2 = 10
-            # if player is not at the end of the board they just go again from left to right, each move is worth
-            # 50 pixels to the right
-            else:
-                pos_x2 += 50
-            # if they go past the board in the bottom right corner then they have to restart from the beginning
-            # this qualifies as features from table 1 "Exact Requirements"
-            if pos_x2 > 360:
-                print("Player 2: Rolled over the end of the board. Go back to the start!")
-                pos_x2 = 10
-                pos_y2 = 30
-                break
-            # updating the screen and delaying it after the move of the player
-            pygame.display.update()
-            pygame.time.delay(300)
-
-        # this displays the player going on the last block to win the game, without it you would not see
-        # the player go on the last box
+        # Player 2's turn
+        pos_x2, pos_y2 = handle_player_turn(win, board, font, "Blue", pos_x2, pos_y2, player2, pos_x1, pos_y1)
         win.blit(board, (0, 0))
         player1(win, pos_x1, pos_y1)
         player2(win, pos_x2, pos_y2)
         pygame.display.update()
         pygame.time.delay(300)
 
-        # checks to see if player two is at the exact coordinates of the last box, if they are then the game ends
-        # and this player won
+        # if player 2 lands on these coordinates and stays there, then they win the game
         if pos_y2 == 330 and pos_x2 == 360:
             print("Player 2 wins")
             break
 
+        # tie game if they go over 30 turns
+        if counter > 30:
+            print("Tie game")
+            break
 
+
+#
+def handle_player_turn(win, board, font, player_color, pos_x, pos_y, draw_player_function, pos_x2, pos_y2):
+    # printing which player's turn
+    print("Player's ", player_color, " turn")
+    # displaying it on the pygame window
+    display_text_on_board(board, font, f"Player {player_color} turn", (20, 350))
+    pygame.display.update()
+
+    # rolling the die
+    die_1 = roll()
+    die_2 = roll()
+    spaces = die_1 + die_2
+    # showing user what the player rolled
+    display_text_on_board(board, font, f"Player {player_color} rolls {spaces}", (20, 400))
+    pygame.display.update()
+
+    # special rule if they roll a 3, they get to move double the amount of spaces
+    if spaces == 3:
+        spaces += spaces
+        print(f"Congrats Player {player_color}, you get a double move for rolling a 3")
+        print(f"Now you can move {spaces} places")
+
+    # turn is skipped if they roll a 4
+    if spaces == 4:
+        print(f"OH NO. You rolled a 4. This means we skip your turn")
+        spaces = 0
+        print(f"You move {spaces} spaces")
+
+    # for loop that makes the players move spaces and updates the board constantly while they are moving
+    for i in range(spaces):
+        # displaying board
+        win.blit(board, (0, 0))
+        # drawing the current player whose turn it is to move
+        draw_player_function(win, pos_x, pos_y)  # Draw the current player
+
+        # these two if statements draws the other player in the game
+        if player_color == "Blue":
+            player1(win, pos_x2, pos_y2)
+        elif player_color == "Red":
+            player2(win, pos_x2, pos_y2)
+
+        # updating the screen
+        pygame.display.update()
+        pygame.time.delay(500)
+
+        # this if statement moves the player's position forwards and downwards
+        # if they roll enough to move down the board
+        if pos_x > 310 and pos_y < 310:
+            pos_y += 50
+            pos_x = 10
+        # moves the player horizontally
+        else:
+            pos_x += 50
+        # this is if the red player crosses the end of the board, they have to restart
+        if pos_x > 360 and player_color == "Red":
+            print(f"Player {player_color}: Rolled over the end of the board. Go back to the start!")
+            pos_x = 10
+            pos_y = 10
+            break
+
+        # if the blue player crosses the board, they have to restart at their original location from the beginning
+        elif pos_x > 360 and player_color == "Blue":
+            print(f"Player {player_color}: Rolled over the end of the board. Go back to the start!")
+            pos_x = 10
+            pos_y = 30
+            break
+        # showing the board with the new locations of the players
+        win.blit(board, (0, 0))
+
+        # Save the updated player positions
+    return pos_x, pos_y
+
+
+# function to draw player 1
 def player1(win, pos_x1, pos_y1):
     pygame.draw.circle(win, (255, 0, 0), (pos_x1, pos_y1), 8)
 
 
+# function to draw player 2
 def player2(win, pos_x2, pos_y2):
     pygame.draw.circle(win, (0, 0, 255), (pos_x2, pos_y2), 8)
 
 
+# function that rolls the dice
 def roll():
     return random.randint(1, 6)
 
 
-#function used to draw the text on to the screen
+# function used to draw the text on to the screen
 def display_text_on_board(board, font, text, position):
     # Clear the previous text on the screen
     pygame.draw.rect(board, (255, 255, 255), (*position, 300, 50))
@@ -220,5 +206,5 @@ def display_text_on_board(board, font, text, position):
     board.blit(text_surface, position)
 
 
-# calling main function
+# calling main to start the program
 main()
